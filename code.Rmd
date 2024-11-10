@@ -1,0 +1,855 @@
+---
+title: "Alzheimer"
+author: "Hugo Maury"
+date: "`r format (Sys.time(),'%d %B %Y')`"
+fontsize : 7pt
+documentclass: "article"
+output: 
+  html_document:
+    toc: true
+    number_sections: true
+  rmarkdown::html_document:
+    theme : journal
+toc-title: "Sommaire"
+---
+<div style="text-align: justify;">
+\newpage
+
+*Sources :* 
+
+* https://www.kaggle.com/datasets/suleymansulak/obesity-dataset/data
+
+Les analyses ont été réalisées grâce au logiciel Rstudio version 4.0.5.
+
+\newpage
+
+*Contexte*
+
+  Ce jeu de données contient des informations de santé détaillées pour **2 149 patients**, chacun étant identifié de manière unique par des ID allant de **4751 à 6900**. Il inclut des détails démographiques, des facteurs liés au mode de vie, des antécédents médicaux, des mesures cliniques, des évaluations cognitives et fonctionnelles, des symptômes, ainsi qu'un diagnostic de la maladie d'Alzheimer. Ce jeu de données est idéal pour les chercheurs et les data scientists souhaitant explorer les facteurs associés à la maladie d'Alzheimer, développer des modèles prédictifs et mener des analyses statistiques.
+
+\newpage
+
+# ) Présentation des données
+
+**Informations sur les patients**
+
+**Identifiant du patient**  
+- **PatientID** : Un identifiant unique attribué à chaque patient (allant de 4751 à 6900).
+
+**Détails démographiques**  
+- **Âge** : Âge des patients, compris entre 60 et 90 ans.  
+- **Genre** : Sexe des patients, où 0 représente les hommes et 1 représente les femmes.  
+- **Ethnicité** : Origine ethnique des patients, codée comme suit :  
+  - 0 : Caucasien  
+  - 1 : Afro-Américain  
+  - 2 : Asiatique  
+  - 3 : Autre  
+- **Niveau d'éducation** : Niveau d'études des patients, codé comme suit :  
+  - 0 : Aucun  
+  - 1 : Lycée  
+  - 2 : Licence  
+  - 3 : Supérieur  
+
+**Facteurs de mode de vie**  
+- **IMC (Indice de Masse Corporelle)** : IMC des patients, variant de 15 à 40.  
+- **Tabagisme** : Statut de fumeur, où 0 indique Non et 1 indique Oui.  
+- **Consommation d'alcool** : Consommation hebdomadaire d'alcool en unités, variant de 0 à 20.  
+- **Activité physique** : Activité physique hebdomadaire en heures, variant de 0 à 10.  
+- **Qualité de l'alimentation** : Score de qualité de l'alimentation, variant de 0 à 10.  
+- **Qualité du sommeil** : Score de qualité du sommeil, variant de 4 à 10.  
+
+**Antécédents médicaux**  
+- **Antécédents familiaux d'Alzheimer** : Présence d'antécédents familiaux de la maladie d'Alzheimer, où 0 indique Non et 1 indique Oui.  
+- **Maladie cardiovasculaire** : Présence d'une maladie cardiovasculaire, où 0 indique Non et 1 indique Oui.  
+- **Diabète** : Présence de diabète, où 0 indique Non et 1 indique Oui.  
+- **Dépression** : Présence de dépression, où 0 indique Non et 1 indique Oui.  
+- **Blessure à la tête** : Antécédents de blessure à la tête, où 0 indique Non et 1 indique Oui.  
+- **Hypertension** : Présence d'hypertension, où 0 indique Non et 1 indique Oui.  
+
+**Mesures cliniques**  
+- **Pression artérielle systolique (SystolicBP)** : Variant de 90 à 180 mmHg.  
+- **Pression artérielle diastolique (DiastolicBP)** : Variant de 60 à 120 mmHg.  
+- **Cholestérol total** : Niveaux de cholestérol total, de 150 à 300 mg/dL.  
+- **Cholestérol LDL** : Niveaux de lipoprotéines de basse densité, de 50 à 200 mg/dL.  
+- **Cholestérol HDL** : Niveaux de lipoprotéines de haute densité, de 20 à 100 mg/dL.  
+- **Triglycérides** : Niveaux de triglycérides, de 50 à 400 mg/dL.  
+
+**Évaluations cognitives et fonctionnelles**  
+- **MMSE (Mini-Mental State Examination)** : Score de l'examen de l'état mental, variant de 0 à 30. Des scores faibles indiquent un trouble cognitif.  
+- **Évaluation fonctionnelle** : Score d'évaluation fonctionnelle, de 0 à 10. Des scores faibles indiquent une plus grande déficience.  
+- **Plaintes de mémoire** : Présence de plaintes liées à la mémoire, où 0 indique Non et 1 indique Oui.  
+- **Problèmes comportementaux** : Présence de problèmes comportementaux, où 0 indique Non et 1 indique Oui.  
+- **ADL (Activités de la vie quotidienne)** : Score des activités de la vie quotidienne, de 0 à 10. Des scores faibles indiquent une plus grande déficience.
+
+**Symptômes**  
+
+- **Confusion** : Présence de confusion, où 0 indique Non et 1 indique Oui.  
+- **Désorientation** : Présence de désorientation, où 0 indique Non et 1 indique Oui.  
+- **Changements de personnalité** : Présence de changements de personnalité, où 0 indique Non et 1 indique Oui.  
+- **Difficulté à accomplir des tâches** : Présence de difficultés à accomplir des tâches, où 0 indique Non et 1 indique Oui.  
+- **Oubli** : Présence d'oubli, où 0 indique Non et 1 indique Oui.  
+
+**Informations sur le diagnostic**  
+
+- **Diagnostic** : Statut du diagnostic de la maladie d'Alzheimer, où 0 indique Non et 1 indique Oui.  
+
+**Informations confidentielles**  
+
+- **Médecin en charge** : Cette colonne contient des informations confidentielles sur le médecin en charge, avec la valeur "XXXConfid" pour tous les patients.  
+
+**Conclusion**  
+La base de données comprend des informations démographiques, des facteurs de style de vie, des antécédents médicaux, des mesures cliniques, des évaluations cognitives et fonctionnelles, ainsi que des symptômes pour analyser et prédire la maladie d'Alzheimer. Les données sont conçues pour la recherche et les projets de data science tout en respectant la confidentialité des informations sensibles.  
+
+```{r pack_import, echo=FALSE, include=FALSE, warning=FALSE}
+# Importation des packages
+library(dplyr)
+library(gtsummary)
+library(gt)
+library(car)
+library(caret)
+library(MASS)
+library(broom)
+
+# Importations des données
+dataset = read.csv("alzheimers_disease_data.csv")
+
+# Traduction des variables en français
+traduction = c("PatientID", "Age", "Genre", "Ethnicité", "Niveau_éducation", "IMC", "Tabagisme", "Conso_alcool", "Activité_physique",
+               "Qualité_alimentaire", "Qualité_sommeil", "Antécédents_familiaux_alz", "Maladie_cardio", "Diabète", "Dépression",
+               "Blessure_tête", "Hypertension", "Pression_artériel_systolique", "Pression_artérielle_diastolique", "Cholestérol_tot",
+               "Cholestérol_LDL", "Cholestérol_HDL", "Triglycérides", "MMSE", "Evaluation_fonctionnelle", "Plaintes_mémoires", 
+               "Problèmes_comportementaux", "ADL", "Confusion", "Désorientation", "Changement_perso", "Difficulté_accomplir_tache",
+               "Oubli", "Diagnostic", "Medecin_en_charge")
+var = 1
+for (colonne in names(dataset)) {
+  # Renommer les colonnes en utilisant la traduction
+  dataset <- dataset %>% rename(!!traduction[var] := all_of(colonne))
+  var = var + 1
+}
+
+```
+
+\newpage
+
+# ) Première analyse
+
+## ) Distribution des caractéristiques de l'Alzheimer par détails démographiques
+
+Le tableau ci-dessous présente une analyse descriptive des caractéristiques démographiques des patients, en fonction de leur statut diagnostique par rapport à la maladie d'Alzheimer. Il regroupe des informations sur l'âge, le genre, l'origine ethnique et le niveau d'éducation, permettant ainsi de comparer les profils des patients atteints et non atteints de la maladie.
+
+```{r tab_demo, echo=FALSE}
+# Détails démographiques
+data_demo = dataset[, c(2:5, 34)]
+
+tableau__detail_demo <- data_demo %>%
+  mutate(Genre = ifelse(Genre == 0, "Homme", "Femme"),
+         Ethnicité = ifelse(Ethnicité == 0, "Caucasien",
+                            ifelse(Ethnicité == 1, "Afro-Américain",
+                                   ifelse(Ethnicité == 2, "Asiatique", "Autre"))),
+         Niveau_éducation = ifelse(Niveau_éducation == 0, "Aucun",
+                                   ifelse(Niveau_éducation == 1, "Lycée",
+                                          ifelse(Niveau_éducation == 2, "Licence", "Supérieur"))),
+         Diagnostic =  factor(Diagnostic, levels = c(0, 1), labels = c("Non-atteint", "Atteint"))
+         ) %>%
+  rename("Niveau d'éducation" = Niveau_éducation) %>% 
+  tbl_summary(
+    by = Diagnostic, 
+    statistic = list(all_categorical() ~ "{n} ({p}%)") # pourcentage pour les variables catégorielles
+    ) %>%
+  add_p() %>% 
+  bold_labels() %>%
+  italicize_levels() %>%
+
+  modify_header(
+    list(
+      label ~ "**Variable**",
+      all_stat_cols(stat_0 = FALSE) ~ "_{level}_ (n={n}, {style_percent(p)}%)"
+    )
+  )  %>%
+  as_gt() %>% # Convertir en objet gt pour personnalisation
+  tab_header(
+    title = "Distribution des caractéristiques de l'Alzheimer par détails démographiques"
+  ) 
+
+
+# Afficher le tableau
+tableau__detail_demo
+```
+
+Ce tableau présente les caractéristiques démographiques des patients en fonction de leur statut diagnostique (atteints ou non atteints de la maladie d'Alzheimer). Les variables analysées incluent l'âge, le genre, l'origine ethnique et le niveau d'éducation des patients. Voici une interprétation détaillée des résultats pour chaque variable.
+
+
+*Définition*
+Une **p-value faible** (moins de 0,05) indique que les différences observées sont significatives et peu susceptibles d'être dues au hasard.<br>
+Une **p-value élevée** (plus de 0,05) indique qu'il est difficile de conclure qu'il y a une différence significative entre les groupes comparés.<br>
+Il est important de noter que la p-value ne prouve pas qu'une hypothèse est vraie ou fausse. Elle aide seulement à quantifier la probabilité que les résultats observés soient dus au hasard.
+
+
+*1. Âge*<br>
+Non-atteints : L'âge médian des patients non atteints de la maladie d'Alzheimer est de 75 ans, avec une plage d'âge allant de 67 à 83 ans.<br>
+Atteints : L'âge médian des patients atteints de la maladie d'Alzheimer est également de 75 ans, avec une plage d'âge similaire (67 à 83 ans).<br>
+Interprétation : L'âge médian est identique pour les deux groupes, et la différence n'est pas statistiquement significative (p-value = 0.8), ce qui signifie que l'âge ne semble pas être un facteur discriminant entre les deux groupes dans cette étude.<br>
+
+*2. Genre*<br>
+Non-atteints : 51% des patients non atteints sont des femmes et 49% des hommes.<br>
+Atteints : 49% des patients atteints sont des femmes et 51% des hommes.<br>
+Interprétation : Il y a une répartition relativement équilibrée des genres dans les deux groupes (atteints et non atteints), avec une légère majorité de femmes dans le groupe des non-atteints et une légère majorité d'hommes dans le groupe des atteints. La différence entre les groupes n'est pas statistiquement significative (p-value = 0.3), ce qui suggère qu'il n'y a pas de lien clair entre le genre et l'état de la maladie dans cette population.<br>
+
+*3. Ethnicité*<br>
+Non-atteints :22% des patients sont Afro-Américains, 8.8% sont Asiatiques, 10% sont d'une autre origine ethnique, et 59% sont Caucasiens.<br>
+Atteints :19% des patients sont Afro-Américains, 11% sont Asiatiques, 8.8% sont d'une autre origine ethnique, et 61% sont Caucasiens.<br>
+Interprétation : Bien qu'il y ait des variations dans les proportions d'ethnies entre les deux groupes, aucune différence significative n'est observée dans l'ensemble (p-value = 0.10). Cela suggère que l'origine ethnique n'est pas un facteur déterminant dans la présence ou l'absence de la maladie d'Alzheimer dans cette population.<br>
+
+*4. Niveau d'éducation*<br>
+Non-atteints :20% n'ont aucun diplôme, 30% ont une licence, 40% ont un diplôme de lycée, et 11% ont un diplôme supérieur.<br>
+Atteints :23% n'ont aucun diplôme, 29% ont une licence, 40% ont un diplôme de lycée, et 8.8% ont un diplôme supérieur.<br>
+Interprétation : Les deux groupes présentent une répartition similaire dans la catégorie des diplômes de lycée et licence. Cependant, une proportion légèrement plus élevée de patients non atteints a un niveau d'éducation plus élevé, notamment une licence ou un diplôme supérieur. La différence n'est cependant pas statistiquement significative (p-value = 0.2), ce qui suggère que le niveau d'éducation n'est pas un facteur majeur dans l'apparition de la maladie d'Alzheimer dans cette étude.
+
+
+*Conclusion générale*<br>
+Ce tableau fournit une vue d'ensemble des caractéristiques démographiques des patients atteints et non atteints de la maladie d'Alzheimer. Aucune des variables (âge, genre, ethnicité, niveau d'éducation) ne présente de différences statistiquement significatives entre les deux groupes, ce qui suggère que, dans cette étude, ces facteurs démographiques ne sont pas des indicateurs clairs du développement de la maladie d'Alzheimer. Cependant, il est important de noter que d'autres facteurs non pris en compte dans ce tableau peuvent influencer l'apparition de la maladie.
+
+
+\newpage
+
+## ) Distribution des caractéristiques de l'Alzheimer par facteurs de mode de vie
+
+Le tableau ci-dessous présente une analyse descriptive des caractéristiques par facteurs de mode de vie des patients, en fonction de leur statut diagnostique par rapport à la maladie d'Alzheimer. Il regroupe des informations sur l'IMC, le tabagisme, l'activité physique, la qualité d'alimentation et de sommeil, permettant ainsi de comparer les profils des patients atteints et non atteints de la maladie.
+
+```{r tab_mod, echo=FALSE}
+# Détails facteurs de mode de vie
+data_vie = dataset[, c(6:11, 34)] 
+
+tableau__detail_vie <- data_vie %>%
+  mutate(Tabagisme = case_when(
+      Tabagisme == 0 ~ "Non-fumeur",
+      TRUE ~ "Fumeur"
+    ),
+      Diagnostic =  factor(Diagnostic, levels = c(0, 1), labels = c("Non-atteint", "Atteint"))) %>%
+  rename("Consommation d'alcool" = Conso_alcool,
+         "Activité physique" =  Activité_physique,
+         "Qualité d'alimentation" = Qualité_alimentaire,
+         "Qualité du sommeil" = Qualité_sommeil) %>% 
+  tbl_summary(
+    by = Diagnostic, 
+    statistic = list(all_categorical() ~ "{n} ({p}%)") # pourcentage pour les variables catégorielles
+    ) %>%
+  add_p() %>% 
+  bold_labels() %>%
+  italicize_levels() %>%
+
+  modify_header(
+    list(
+      label ~ "**Variable**",
+      all_stat_cols(stat_0 = FALSE) ~ "_{level}_ (n={n}, {style_percent(p)}%)"
+    )
+  )  %>%
+  as_gt() %>% # Convertir en objet gt pour personnalisation
+  tab_header(
+    title = "Distribution des caractéristiques de l'Alzheimer par facteurs de mode de vie"
+  ) 
+
+
+# Afficher le tableau
+tableau__detail_vie
+```
+
+*1. IMC (Indice de Masse Corporelle)*<br>
+Non-atteints : L'IMC médian des patients non atteints de la maladie d'Alzheimer est de 28, avec un intervalle interquartile (IQR) allant de 22 à 34.<br>
+Atteints : L'IMC médian des patients atteints de la maladie d'Alzheimer est également de 28, avec un intervalle interquartile similaire (22 à 34).<br>
+Interprétation : L'IMC médian est identique pour les deux groupes, et la différence n'est pas statistiquement significative (p-value = 0.2), ce qui suggère que l'IMC ne semble pas être un facteur discriminant entre les deux groupes dans cette étude.<br>
+
+*2. Tabagisme*<br>
+Non-atteints : 29% des patients non atteints sont fumeurs, tandis que 71% sont non-fumeurs.<br>
+Atteints : 29% des patients atteints sont fumeurs, tandis que 71% sont non-fumeurs.<br>
+Interprétation : La proportion de fumeurs est identique dans les deux groupes. La différence n'est pas statistiquement significative (p-value = 0.8), ce qui indique que le tabagisme ne semble pas avoir de lien avec l'état de la maladie d'Alzheimer dans cette population.<br>
+
+*3. Consommation d'alcool*<br>
+Non-atteints : La consommation d'alcool médiane est de 10.0 unités par semaine, avec un intervalle interquartile de 5.3 à 15.1 unités.<br>
+Atteints : La consommation d'alcool médiane est de 9.9 unités par semaine, avec un intervalle interquartile de 4.8 à 15.2 unités.<br>
+Interprétation : Les médianes de la consommation d'alcool sont très similaires pour les deux groupes, et la différence n'est pas statistiquement significative (p-value = 0.7), ce qui suggère que la consommation d'alcool n'a pas de lien avec la présence ou l'absence de la maladie d'Alzheimer dans cette étude.<br>
+
+*4. Activité physique*<br>
+Non-atteints : Le nombre d'heures d'activité physique médian par semaine est de 4.73, avec un intervalle interquartile de 2.52 à 7.46 heures.<br>
+Atteints : Le nombre d'heures d'activité physique médian par semaine est de 4.85, avec un intervalle interquartile de 2.63 à 7.37 heures.<br>
+Interprétation : Les deux groupes présentent des niveaux similaires d'activité physique, avec des médianes proches. La différence n'est pas statistiquement significative (p-value = 0.8), ce qui suggère que l'activité physique n'est pas un facteur discriminant entre les deux groupes en termes de la maladie d'Alzheimer.<br>
+
+*5. Qualité de l'alimentation*<br>
+Non-atteints : Le score médian de la qualité de l'alimentation est de 5.07, avec un intervalle interquartile de 2.35 à 7.52.<br>
+Atteints : Le score médian de la qualité de l'alimentation est de 5.08, avec un intervalle interquartile de 2.60 à 7.58.<br>
+Interprétation : La qualité de l'alimentation semble similaire entre les deux groupes, avec des scores médian proches. La différence n'est pas statistiquement significative (p-value = 0.7), ce qui suggère que la qualité de l'alimentation ne joue probablement pas un rôle déterminant dans l'apparition de la maladie d'Alzheimer dans cette étude.<br>
+
+*6. Qualité du sommeil*<br>
+Non-atteints : Le score médian de la qualité du sommeil est de 7.24, avec un intervalle interquartile de 5.56 à 8.65.<br>
+Atteints : Le score médian de la qualité du sommeil est de 6.91, avec un intervalle interquartile de 5.34 à 8.41.<br>
+Interprétation : Les patients non atteints semblent avoir une meilleure qualité de sommeil que ceux atteints, avec une différence statistiquement significative (p-value = 0.009). Cela suggère que la qualité du sommeil pourrait être un facteur influençant le risque de développer la maladie d'Alzheimer, les personnes ayant un sommeil de meilleure qualité semblant moins susceptibles de développer la maladie.<br>
+
+*Conclusion générale*<br>
+Ce tableau présente les caractéristiques des facteurs du mode de vie chez les patients atteints et non atteints de la maladie d'Alzheimer. Aucune des variables (IMC, tabagisme, consommation d'alcool, activité physique, qualité de l'alimentation) ne montre de différence significative entre les deux groupes. Cependant, la qualité du sommeil se distingue par une différence significative, indiquant qu'une meilleure qualité du sommeil pourrait être associée à un risque réduit de développer la maladie d'Alzheimer. D'autres facteurs non mesurés dans cette étude pourraient également jouer un rôle important dans l'apparition de la maladie.
+
+\newpage
+
+## ) Distribution des caractéristiques de l'Alzheimer par antécédents médicaux
+
+Le tableau ci-dessous présente une analyse descriptive des caractéristiques par antécédents médicaux des patients, en fonction de leur statut diagnostique par rapport à la maladie d'Alzheimer. Il regroupe des informations sur les antécédents familiaux lié à l'alzheimer, la présence de maladie cardiovasculaire, de diabété, de dépression, d'une ancienne blessure à la tête et d'hypertension, permettant ainsi de comparer les profils des patients atteints et non atteints de la maladie.
+
+```{r tab_ant, echo=FALSE}
+# Détails antécédents médicaux
+data_ant_med = dataset[, c(12:17, 34)]  
+
+tableau__detail_ant_med <- data_ant_med %>%
+  mutate(Antécédents_familiaux_alz = case_when(
+      Antécédents_familiaux_alz == 0 ~ "Non",
+      TRUE ~ "Oui"
+    ),
+    Maladie_cardio = case_when(
+      Maladie_cardio == 0 ~ "Non",
+      TRUE ~ "Oui"
+    ),
+    Diabète = case_when(
+      Diabète == 0 ~ "Non",
+      TRUE ~ "Oui"
+    ),
+    Dépression = case_when(
+      Dépression == 0 ~ "Non",
+      TRUE ~ "Oui"
+    ),
+    Blessure_tête = case_when(
+      Blessure_tête == 0 ~ "Non",
+      TRUE ~ "Oui"
+    ),
+    Hypertension = case_when(
+      Hypertension == 0 ~ "Non",
+      TRUE ~ "Oui"
+    ),
+      Diagnostic =  factor(Diagnostic, levels = c(0, 1), labels = c("Non-atteint", "Atteint"))) %>%
+  rename("Antécédents familiaux d'Alzheimer" = Antécédents_familiaux_alz,
+         "Maladie cardiovasculaire" =  Maladie_cardio) %>% 
+  tbl_summary(
+    by = Diagnostic, 
+    statistic = list(all_categorical() ~ "{n} ({p}%)") # pourcentage pour les variables catégorielles
+    ) %>%
+  add_p() %>% 
+  bold_labels() %>%
+  italicize_levels() %>%
+
+  modify_header(
+    list(
+      label ~ "**Variable**",
+      all_stat_cols(stat_0 = FALSE) ~ "_{level}_ (n={n}, {style_percent(p)}%)"
+    )
+  )  %>%
+  as_gt() %>% # Convertir en objet gt pour personnalisation
+  tab_header(
+    title = "Distribution des caractéristiques de l'Alzheimer par antécédents médicaux"
+  ) 
+
+
+# Afficher le tableau
+tableau__detail_ant_med
+```
+
+*1. Antécédents familiaux d'Alzheimer*<br>
+Non-atteints : 26% des patients non atteints ont des antécédents familiaux d'Alzheimer.<br>
+Atteints : 23% des patients atteints ont des antécédents familiaux d'Alzheimer.<br>
+Interprétation : Bien qu'une proportion plus élevée de patients non atteints ait des antécédents familiaux, la différence entre les deux groupes n'est pas statistiquement significative (p-value = 0.13). Cela suggère que la présence d'antécédents familiaux d'Alzheimer n'est pas un facteur discriminant clair entre les patients atteints et non atteints de la maladie dans cette étude.<br>
+
+*2. Maladie cardiovasculaire*<br>
+Non-atteints : 14% des patients non atteints souffrent de maladies cardiovasculaires.<br>
+Atteints : 16% des patients atteints souffrent de maladies cardiovasculaires.<br>
+Interprétation : La proportion de patients atteints de maladies cardiovasculaires est légèrement plus élevée dans le groupe des patients atteints d'Alzheimer, mais cette différence n'est pas statistiquement significative (p-value = 0.14). Cela indique que, dans cette étude, la maladie cardiovasculaire ne semble pas être un facteur déterminant pour la présence de la maladie d'Alzheimer.<br>
+
+*3. Diabète*<br>
+Non-atteints : 16% des patients non atteints ont un diagnostic de diabète.<br>
+Atteints : 14% des patients atteints ont un diagnostic de diabète.<br>
+Interprétation : La différence dans les taux de diabète entre les deux groupes est faible, et la p-value de 0.14 indique qu'elle n'est pas statistiquement significative. Cela suggère que le diabète n'est pas un facteur majeur dans l'apparition de la maladie d'Alzheimer dans cette population.<br>
+
+*4. Dépression*<br>
+Non-atteints : 20% des patients non atteints ont des antécédents de dépression.<br>
+Atteints : 20% des patients atteints ont des antécédents de dépression.<br>
+Interprétation : La proportion de patients ayant des antécédents de dépression est identique entre les deux groupes, avec une p-value de 0.8, ce qui indique qu'il n'y a pas de différence statistiquement significative. Cela suggère que la dépression ne semble pas être un facteur discriminant pour la présence de la maladie d'Alzheimer dans cette étude.<br>
+
+*5. Blessure à la tête*<br>
+Non-atteints : 9.7% des patients non atteints ont eu une blessure à la tête.<br>
+Atteints : 8.4% des patients atteints ont eu une blessure à la tête.<br>
+Interprétation : La différence entre les deux groupes est faible, et la p-value de 0.3 montre qu'elle n'est pas statistiquement significative. Cela suggère qu'une blessure à la tête ne semble pas jouer un rôle majeur dans l'apparition de la maladie d'Alzheimer dans cette population.<br>
+
+*6. Hypertension*<br>
+Non-atteints : 14% des patients non atteints souffrent d'hypertension.<br>
+Atteints : 17% des patients atteints souffrent d'hypertension.<br>
+Interprétation : Bien qu'une proportion plus élevée de patients atteints d'Alzheimer ait de l'hypertension, la p-value de 0.10 indique que cette différence n'est pas statistiquement significative. Cela suggère que l'hypertension n'est pas un facteur clairement lié à la présence ou l'absence de la maladie d'Alzheimer dans cette étude.<br>
+
+*Conclusion générale*<br>
+Ce tableau examine la distribution des antécédents médicaux des patients atteints et non atteints de la maladie d'Alzheimer. Aucune des variables (antécédents familiaux d'Alzheimer, maladie cardiovasculaire, diabète, dépression, blessure à la tête, hypertension) ne présente de différences statistiquement significatives entre les deux groupes, ce qui suggère que, dans cette étude, ces facteurs médicaux n'ont pas de rôle déterminant dans l'apparition de la maladie d'Alzheimer. Toutefois, il est important de noter que d'autres facteurs non mesurés ou non inclus dans ce tableau pourraient influencer le développement de la maladie.
+
+\newpage
+
+## ) Distribution des caractéristiques de l'Alzheimer par mesure clinique
+
+Le tableau ci-dessous présente une analyse descriptive des caractéristiques par mesures cliniques des patients, en fonction de leur statut diagnostique par rapport à la maladie d'Alzheimer. Il regroupe des informations sur la pression artérielle systolique et diastolique, le niveaux de cholestérol et de triglycérides, permettant ainsi de comparer les profils des patients atteints et non atteints de la maladie.
+
+```{r tab_mes, echo=FALSE}
+# Détails amesure clinique
+data_mes_cli = dataset[, c(18:23, 34)]  
+
+tableau__detail_mes_cli <- data_mes_cli %>%
+  mutate(Diagnostic =  factor(Diagnostic, levels = c(0, 1), labels = c("Non-atteint", "Atteint"))) %>%
+  rename("Pression artérielle systolique" = Pression_artériel_systolique,
+         "Pression artérielle diastolique" =  Pression_artérielle_diastolique,
+         "Cholestérol total" = Cholestérol_tot,
+         "Cholestérol LDL" = Cholestérol_LDL,
+         "Cholestérol HDL" = Cholestérol_HDL) %>% 
+  tbl_summary(
+    by = Diagnostic, 
+    statistic = list(all_categorical() ~ "{n} ({p}%)") # pourcentage pour les variables catégorielles
+    ) %>%
+  add_p() %>% 
+  bold_labels() %>%
+  italicize_levels() %>%
+
+  modify_header(
+    list(
+      label ~ "**Variable**",
+      all_stat_cols(stat_0 = FALSE) ~ "_{level}_ (n={n}, {style_percent(p)}%)"
+    )
+  )  %>%
+  as_gt() %>% # Convertir en objet gt pour personnalisation
+  tab_header(
+    title = "Distribution des caractéristiques de l'Alzheimer par mesure clinique"
+  ) 
+
+
+# Afficher le tableau
+tableau__detail_mes_cli
+```
+
+*1. Pression artérielle systolique*<br>
+Non-atteints : La pression artérielle systolique médiane des patients non atteints est de 135 mmHg, avec une plage allant de 111 à 157 mmHg.<br>
+Atteints : La pression artérielle systolique médiane des patients atteints est de 133 mmHg, avec une plage allant de 112 à 156 mmHg.<br>
+Interprétation : La différence entre les deux groupes pour la pression artérielle systolique est faible et la p-value de 0.5 indique que cette différence n'est pas statistiquement significative. Cela suggère que la pression artérielle systolique ne semble pas être un facteur discriminant pour l'apparition de la maladie d'Alzheimer dans cette étude.<br>
+
+*2. Pression artérielle diastolique*<br>
+Non-atteints : La pression artérielle diastolique médiane des patients non atteints est de 90 mmHg, avec une plage allant de 75 à 105 mmHg.<br>
+Atteints : La pression artérielle diastolique médiane des patients atteints est de 91 mmHg, avec une plage allant de 74 à 105 mmHg.<br>
+Interprétation : La différence entre les groupes pour la pression artérielle diastolique est minime, et la p-value de 0.8 indique qu'elle n'est pas statistiquement significative. Cela suggère que la pression artérielle diastolique ne joue pas un rôle majeur dans la présence ou l'absence de la maladie d'Alzheimer dans cette population.<br>
+
+*3. Cholestérol total*<br>
+Non-atteints : Le cholestérol total médian des patients non atteints est de 224 mg/dL, avec une plage allant de 192 à 262 mg/dL.<br>
+Atteints : Le cholestérol total médian des patients atteints est de 226 mg/dL, avec une plage allant de 189 à 263 mg/dL.<br>
+Interprétation : La différence entre les deux groupes pour le cholestérol total est minime, et la p-value de 0.8 montre qu'elle n'est pas statistiquement significative. Cela suggère que le cholestérol total ne constitue pas un facteur discriminant pour la maladie d'Alzheimer dans cette étude.<br>
+
+*4. Cholestérol LDL (lipoprotéines de basse densité)*<br>
+Non-atteints : Le cholestérol LDL médian des patients non atteints est de 125 mg/dL, avec une plage allant de 88 à 163 mg/dL.<br>
+Atteints : Le cholestérol LDL médian des patients atteints est de 122 mg/dL, avec une plage allant de 85 à 160 mg/dL.<br>
+Interprétation : La différence dans les valeurs du cholestérol LDL entre les deux groupes est faible, et la p-value de 0.14 indique qu'elle n'est pas statistiquement significative. Cela suggère que le cholestérol LDL n'est pas un facteur clé dans l'apparition de la maladie d'Alzheimer.<br>
+
+*5. Cholestérol HDL (lipoprotéines de haute densité)*<br>
+Non-atteints : Le cholestérol HDL médian des patients non atteints est de 58 mg/dL, avec une plage allant de 39 à 78 mg/dL.<br>
+Atteints : Le cholestérol HDL médian des patients atteints est de 62 mg/dL, avec une plage allant de 40 à 81 mg/dL.<br>
+Interprétation : Les patients atteints d'Alzheimer présentent une légère différence dans le cholestérol HDL, avec des valeurs légèrement plus élevées que ceux non atteints. Cette différence est statistiquement significative (p-value = 0.049), ce qui suggère que le cholestérol HDL pourrait être un facteur lié à l'apparition de la maladie d'Alzheimer, bien que cette relation soit relativement faible.<br>
+
+*6. Triglycérides*<br>
+Non-atteints : La médiane des triglycérides pour les patients non atteints est de 226 mg/dL, avec une plage allant de 137 à 313 mg/dL.<br>
+Atteints : La médiane des triglycérides pour les patients atteints est de 240 mg/dL, avec une plage allant de 140 à 316 mg/dL.<br>
+Interprétation : La différence dans les triglycérides entre les deux groupes est modeste, et la p-value de 0.3 montre qu'elle n'est pas statistiquement significative. Cela suggère que les niveaux de triglycérides ne sont pas un facteur discriminant pour la maladie d'Alzheimer dans cette population.<br>
+
+*Conclusion générale*<br>
+Ce tableau examine la distribution des caractéristiques biologiques liées à la santé cardiaque et au métabolisme (pression artérielle, cholestérol, triglycérides) chez les patients atteints et non atteints de la maladie d'Alzheimer. La plupart des variables, y compris la pression artérielle systolique, diastolique, le cholestérol total, LDL et les triglycérides, ne présentent pas de différences statistiquement significatives entre les groupes. Toutefois, une différence statistiquement significative a été observée dans les niveaux de cholestérol HDL, suggérant qu'il pourrait y avoir un lien faible entre le cholestérol HDL et la maladie d'Alzheimer. Cependant, d'autres études seraient nécessaires pour mieux comprendre ce lien potentiel.
+
+\newpage
+
+## ) Distribution des caractéristiques de l'Alzheimer par évaluations cognitives et fonctionnelles
+
+Le tableau ci-dessous présente une analyse descriptive des caractéristiques par évaluations cognitives et fonctionnelles des patients, en fonction de leur statut diagnostique par rapport à la maladie d'Alzheimer. Il regroupe des informations sur le MMSE, l'évaluation fonctionnelle, les plaintes de mémoires, les problèmes comportementaux et l'ADL (activité de la vie quotidienne), permettant ainsi de comparer les profils des patients atteints et non atteints de la maladie.
+
+```{r tab_eva, echo=FALSE}
+# Détails évaluations cognitives et fonctionnelles
+data_cog_fon = dataset[, c(24:28, 34)]
+
+tableau__detail_cog_fon <- data_cog_fon %>%
+  mutate(Plaintes_mémoires = case_when(
+      Plaintes_mémoires == 0 ~ "Non",
+      TRUE ~ "Oui"
+    ),
+    Problèmes_comportementaux = case_when(
+      Problèmes_comportementaux == 0 ~ "Non",
+      TRUE ~ "Oui"
+    ),
+    Diagnostic =  factor(Diagnostic, levels = c(0, 1), labels = c("Non-atteint", "Atteint"))) %>%
+  rename("Evaluation fonctionnelle" = Evaluation_fonctionnelle,
+         "Plaintes mémoires" =  Plaintes_mémoires,
+         "Problèmes comportementaux" = Problèmes_comportementaux) %>% 
+  tbl_summary(
+    by = Diagnostic, 
+    statistic = list(all_categorical() ~ "{n} ({p}%)") # pourcentage pour les variables catégorielles
+    ) %>%
+  add_p() %>% 
+  bold_labels() %>%
+  italicize_levels() %>%
+
+  modify_header(
+    list(
+      label ~ "**Variable**",
+      all_stat_cols(stat_0 = FALSE) ~ "_{level}_ (n={n}, {style_percent(p)}%)"
+    )
+  )  %>%
+  as_gt() %>% # Convertir en objet gt pour personnalisation
+  tab_header(
+    title = "Distribution des caractéristiques de l'Alzheimer par évaluations cognitives et fonctionnelles"
+  ) 
+
+
+# Afficher le tableau
+tableau__detail_cog_fon
+```
+
+*1. MMSE (Mini-Mental State Examination)*<br>
+Non-atteints : La médiane du score MMSE chez les patients non atteints de la maladie d'Alzheimer est de 17, avec une plage allant de 9 à 25.<br>
+Atteints : La médiane du score MMSE chez les patients atteints est de 12, avec une plage allant de 6 à 18.<br>
+Interprétation : Les patients atteints de la maladie d'Alzheimer ont un score MMSE médian plus bas que les patients non atteints, ce qui reflète une déficience cognitive plus marquée. La différence entre les groupes est statistiquement significative (p-value < 0.001), suggérant que les scores MMSE sont fortement liés à l'état de la maladie, avec des scores plus bas chez les patients atteints.<br>
+
+*2. Évaluation fonctionnelle*<br>
+Non-atteints : La médiane de l'évaluation fonctionnelle chez les patients non atteints est de 6.24, avec une plage allant de 3.85 à 8.12.<br>
+Atteints : La médiane de l'évaluation fonctionnelle chez les patients atteints est de 3.30, avec une plage allant de 1.58 à 4.92.<br>
+Interprétation : Les patients non atteints ont des scores d'évaluation fonctionnelle plus élevés que les patients atteints, ce qui indique qu'ils présentent de meilleures capacités fonctionnelles. Cette différence est statistiquement significative (p-value < 0.001), suggérant que l’évaluation fonctionnelle est un bon indicateur de l'impact de la maladie d'Alzheimer sur les capacités des individus.<br>
+
+*3. Plaintes de mémoire*<br>
+Non-atteints : 12% des patients non atteints rapportent des plaintes de mémoire.<br>
+Atteints : 38% des patients atteints rapportent des plaintes de mémoire.<br>
+Interprétation : Une proportion plus élevée de patients atteints de la maladie d'Alzheimer rapporte des plaintes de mémoire par rapport aux patients non atteints. Cette différence est statistiquement significative (p-value < 0.001), ce qui suggère que les plaintes de mémoire sont plus fréquentes chez les patients atteints de la maladie d'Alzheimer, un symptôme caractéristique de cette maladie.<br>
+
+*4. Problèmes comportementaux*<br>
+Non-atteints : 9.6% des patients non atteints présentent des problèmes comportementaux.<br>
+Atteints : 27% des patients atteints présentent des problèmes comportementaux.<br>
+Interprétation : Une proportion plus élevée de patients atteints de la maladie d'Alzheimer présente des problèmes comportementaux par rapport aux patients non atteints. Cette différence est statistiquement significative (p-value < 0.001), indiquant que les troubles comportementaux sont courants chez les patients atteints de la maladie d'Alzheimer.<br>
+
+*5. ADL (Activités de la Vie Quotidienne)*<br>
+Non-atteints : La médiane des scores ADL des patients non atteints est de 6.14, avec une plage allant de 3.40 à 8.00.<br>
+Atteints : La médiane des scores ADL des patients atteints est de 3.24, avec une plage allant de 1.43 à 5.03.<br>
+Interprétation : Les patients non atteints présentent de meilleures capacités pour accomplir leurs activités quotidiennes par rapport aux patients atteints. La différence est statistiquement significative (p-value < 0.001), ce qui indique que la capacité à effectuer les activités de la vie quotidienne est largement affectée par la maladie d'Alzheimer.<br>
+
+*Conclusion générale*<br>
+Ce tableau présente les différences observées dans diverses évaluations cognitives et fonctionnelles entre les patients atteints et non atteints de la maladie d'Alzheimer. Les scores MMSE, les évaluations fonctionnelles, les plaintes de mémoire, les problèmes comportementaux, et les scores ADL montrent tous des différences statistiquement significatives entre les deux groupes, avec des valeurs indiquant un déclin plus important des capacités cognitives et fonctionnelles chez les patients atteints de la maladie. Ces résultats soulignent l'impact significatif de la maladie d'Alzheimer sur les fonctions cognitives et comportementales des individus.
+
+\newpage
+
+## ) Distribution des caractéristiques de l'Alzheimer par symptômes
+
+Le tableau ci-dessous présente une analyse descriptive des caractéristiques par symptômes des patients, en fonction de leur statut diagnostique par rapport à la maladie d'Alzheimer. Il regroupe des informations sur la confusion, la désorientation, le changement de personnalité, la difficulté à accomplir des tâches et l'oubli, permettant ainsi de comparer les profils des patients atteints et non atteints de la maladie.
+
+```{r tab_sym, echo=FALSE}
+# Détails symptomes
+data_sym = dataset[, c(28:34)]
+
+tableau__detail_sym <- data_sym %>%
+  mutate(Confusion = case_when(
+      Confusion == 0 ~ "Non",
+      TRUE ~ "Oui"
+    ),
+    Désorientation = case_when(
+      Désorientation == 0 ~ "Non",
+      TRUE ~ "Oui"
+    ),
+    Changement_perso = case_when(
+      Changement_perso == 0 ~ "Non",
+      TRUE ~ "Oui"
+    ),
+    Difficulté_accomplir_tache = case_when(
+      Difficulté_accomplir_tache == 0 ~ "Non",
+      TRUE ~ "Oui"
+    ),
+    Oubli = case_when(
+      Oubli == 0 ~ "Non",
+      TRUE ~ "Oui"
+    ),
+    Diagnostic =  factor(Diagnostic, levels = c(0, 1), labels = c("Non-atteint", "Atteint"))) %>%
+  rename("Changement de personnalité" = Changement_perso,
+         "Difficulté à accomplir une tâche" =  Difficulté_accomplir_tache) %>% 
+  tbl_summary(
+    by = Diagnostic, 
+    statistic = list(all_categorical() ~ "{n} ({p}%)") # pourcentage pour les variables catégorielles
+    ) %>%
+  add_p() %>% 
+  bold_labels() %>%
+  italicize_levels() %>%
+
+  modify_header(
+    list(
+      label ~ "**Variable**",
+      all_stat_cols(stat_0 = FALSE) ~ "_{level}_ (n={n}, {style_percent(p)}%)"
+    )
+  )  %>%
+  as_gt() %>% # Convertir en objet gt pour personnalisation
+  tab_header(
+    title = "Distribution des caractéristiques de l'Alzheimer par symptômes"
+  ) 
+
+
+# Afficher le tableau
+tableau__detail_sym
+```
+
+*1. Confusion*<br>
+Non-atteints : 21% des patients non atteints présentent des symptômes de confusion.<br>
+Atteints : 19% des patients atteints de la maladie d'Alzheimer présentent des symptômes de confusion.<br>
+Interprétation : La prévalence de la confusion est légèrement plus élevée chez les patients non atteints par rapport à ceux atteints, mais cette différence n'est pas statistiquement significative (p-value = 0.4). Cela suggère que la confusion n'est pas un facteur discriminant clair entre les deux groupes dans cette étude.<br>
+
+*2. Désorientation*<br>
+Non-atteints : 16% des patients non atteints présentent des symptômes de désorientation.<br>
+Atteints : 15% des patients atteints de la maladie d'Alzheimer présentent des symptômes de désorientation.<br>
+Interprétation : La proportion de patients présentant des symptômes de désorientation est similaire entre les deux groupes. La différence n'est pas statistiquement significative (p-value = 0.3), ce qui suggère que la désorientation n'est pas un facteur discriminant important pour distinguer les patients atteints de ceux non atteints dans cette étude.<br>
+
+*3. Changement de personnalité*<br>
+Non-atteints : 16% des patients non atteints ont un changement de personnalité.<br>
+Atteints : 14% des patients atteints présentent des changements de personnalité.<br>
+Interprétation : Bien que les patients non atteints semblent légèrement plus nombreux à présenter des changements de personnalité que les patients atteints, la différence n'est pas statistiquement significative (p-value = 0.3). Cela indique que les changements de personnalité ne sont pas un facteur discriminant majeur entre les deux groupes dans cette analyse.<br>
+
+*4. Difficulté à accomplir une tâche*<br>
+Non-atteints : 16% des patients non atteints éprouvent des difficultés à accomplir une tâche.<br>
+Atteints : 16% des patients atteints rencontrent également des difficultés à accomplir une tâche.<br>
+Interprétation : La proportion de patients présentant des difficultés à accomplir une tâche est identique entre les deux groupes. Cette différence n'est pas statistiquement significative (p-value = 0.7), ce qui suggère que la difficulté à accomplir des tâches ne semble pas être un symptôme distinctif de la maladie d'Alzheimer dans cette étude.<br>
+
+*5. Oubli*<br>
+Non-atteints : 30% des patients non atteints présentent des symptômes d'oubli.<br>
+Atteints : 30% des patients atteints présentent également des symptômes d'oubli.<br>
+Interprétation : La proportion de patients présentant des symptômes d'oubli est identique entre les groupes des patients atteints et non atteints. Cette différence n'est pas statistiquement significative (p-value > 0.9), indiquant que l'oubli ne constitue pas un symptôme spécifique de la maladie d'Alzheimer dans cette étude.<br>
+
+*Conclusion générale*<br>
+Ce tableau présente les différences entre les symptômes (confusion, désorientation, changement de personnalité, difficulté à accomplir une tâche et oubli) chez les patients atteints et non atteints de la maladie d'Alzheimer. Aucune des différences observées n'est statistiquement significative, ce qui suggère que ces symptômes ne permettent pas de distinguer de manière claire les patients atteints de la maladie d'Alzheimer de ceux non atteints dans cette population. Il est donc possible que d'autres facteurs, non pris en compte dans ce tableau, influencent la manifestation de ces symptômes.
+
+\newpage
+
+## ) Conclusion de la première analyse
+
+**Conclusion générale :**
+
+Les analyses des caractéristiques démographiques, des antécédents médicaux, des facteurs physiopathologiques, des évaluations cognitives et fonctionnelles, ainsi que des symptômes chez les patients atteints et non atteints de la maladie d'Alzheimer révèlent plusieurs tendances intéressantes. Cependant, aucune des variables étudiées ne montre de différences statistiquement significatives entre les groupes atteints et non atteints, ce qui suggère que ces facteurs ne sont pas des indicateurs clairs du développement de la maladie d'Alzheimer dans cette étude.
+
+1. **Caractéristiques démographiques :** L'âge, le genre, l'origine ethnique et le niveau d'éducation ne présentent pas de liens significatifs avec la présence de la maladie. Ces variables semblent avoir une distribution relativement homogène entre les deux groupes.
+   
+2. **Antécédents médicaux :** Les antécédents familiaux d'Alzheimer, les maladies cardiovasculaires, le diabète, la dépression, les blessures à la tête et l'hypertension ne sont pas des facteurs discriminants clairs pour la maladie d'Alzheimer, bien que certaines différences soient observées, elles ne sont pas statistiquement significatives.
+
+3. **Facteurs physiopathologiques :** Les mesures physiopathologiques comme la pression artérielle, les taux de cholestérol et les triglycérides ne montrent pas de différences significatives entre les groupes. Seul le cholestérol HDL montre une légère différence, mais cette variation n'est pas suffisamment marquée pour établir un lien avec la maladie.
+
+4. **Evaluations cognitives et fonctionnelles :** Les résultats des tests cognitifs et fonctionnels révèlent des différences marquées entre les groupes, notamment en ce qui concerne les scores du MMSE, les plaintes mémorielles et les problèmes comportementaux, tous significativement associés à la présence de la maladie d'Alzheimer.
+
+5. **Symptômes :** Les symptômes tels que la confusion, la désorientation, les changements de personnalité, les difficultés à accomplir des tâches et l'oubli ne sont pas des critères discriminants clairs entre les groupes des patients atteints et non atteints, malgré quelques différences observées dans les proportions de personnes affectées.
+
+En résumé, bien que certaines tendances puissent être observées dans les données, les facteurs démographiques, médicaux et symptomatiques ne sont pas suffisants pour prédire ou distinguer de manière significative les patients atteints de la maladie d'Alzheimer. Les évaluations cognitives et fonctionnelles semblent être des indicateurs plus fiables de l'état de la maladie dans cette population. Toutefois, il est essentiel de continuer à explorer d'autres facteurs non abordés dans cette étude pour mieux comprendre les éléments sous-jacents à l'apparition de la maladie.
+
+\newpage
+
+# ) Modèle de prédiction
+
+Dans cette section, nous proposons de construire un modèle de prédiction pour identifier les variables ayant une incidence sur la probabilité de développer la maladie d'Alzheimer. L'objectif est de déterminer quels facteurs (démographiques, médicaux, cognitifs, fonctionnels et symptomatiques) peuvent prédire l'apparition de la maladie, et dans quelle mesure ces variables influencent cette probabilité.
+
+## ) Choix du modèle
+
+Régression logistique : Ce modèle est simple, interprétable et efficace pour prédire une variable binaire. Il permet d'estimer les probabilités de chaque observation d'appartenir à l'une des deux catégories (Atteint ou Non-atteint) en fonction des variables explicatives.
+
+
+Par la suite, nous procédons à l’entraînement du modèle en utilisant l’ensemble des données. Au cours de cette étape, nous ajustons les paramètres du modèle pour optimiser sa capacité de prédiction. Ensuite, nous pouvons analyser les coefficients ou l'importance des variables pour évaluer lesquelles ont le plus d'impact sur la probabilité d’être atteint de la maladie d'Alzheimer.
+
+Pour ce faire, nous utilisons des techniques telles que l’analyse des coefficients dans la régression logistique. Cela nous permet d'identifier les facteurs qui contribuent le plus à la classification des patients comme atteints ou non atteints.
+
+Les étapes clés de cette analyse incluent :
+
+*Entraînement du modèle* : Utilisation d'un sous-ensemble de données (train set) pour ajuster le modèle.
+
+*Évaluation du modèle* : Test sur un autre sous-ensemble de données (test set) pour évaluer la performance du modèle. Des métriques telles que la précision, le rappel, le score F1, et l'AUC (aire sous la courbe ROC) sont utilisées pour évaluer l’efficacité du modèle.
+
+*Importance des variables* : Identification des variables qui influencent le plus la prédiction de la maladie.
+
+\newpage
+
+## ) Le modèle
+
+Un modèle de régression logistique a été développé pour identifier les facteurs prédictifs associés à la probabilité de développer la maladie d'Alzheimer. Le modèle utilise le diagnostic comme variable dépendante (atteint ou non de la maladie d'Alzheimer) et plusieurs variables indépendantes, comprenant des facteurs comportementaux, cognitifs, fonctionnels et médicaux. L'objectif est de déterminer les caractéristiques qui influencent de manière significative la probabilité de la maladie.
+
+Les résultats du modèle final sont présentés ci-dessous, incluant les estimations des coefficients et les p-values associées pour chaque variable.
+
+```{r donnee_train_test, echo=FALSE, warning=FALSE}
+dataset = dataset[, c(-1,-35)]
+
+dataset %>% mutate(Diagnostic = factor(Diagnostic,  labels=c("no", "yes"))) -> dataset
+dataset$Genre = as.factor(dataset$Genre)
+dataset$Ethnicité = as.factor(dataset$Ethnicité)
+dataset$Niveau_éducation = as.factor(dataset$Niveau_éducation)
+dataset$Tabagisme = as.factor(dataset$Tabagisme)
+dataset$Antécédents_familiaux_alz = as.factor(dataset$Antécédents_familiaux_alz)
+dataset$Maladie_cardio = as.factor(dataset$Maladie_cardio)
+dataset$Diabète = as.factor(dataset$Diabète)
+dataset$Dépression = as.factor(dataset$Dépression)
+dataset$Blessure_tête = as.factor(dataset$Blessure_tête)
+
+dataset$Hypertension = as.factor(dataset$Hypertension)
+dataset$Plaintes_mémoires = as.factor(dataset$Plaintes_mémoires)
+dataset$Problèmes_comportementaux = as.factor(dataset$Problèmes_comportementaux)
+dataset$Confusion = as.factor(dataset$Confusion)
+dataset$Désorientation = as.factor(dataset$Désorientation)
+dataset$Changement_perso = as.factor(dataset$Changement_perso)
+dataset$Difficulté_accomplir_tache = as.factor(dataset$Difficulté_accomplir_tache)
+dataset$Oubli = as.factor(dataset$Oubli)
+
+# On sépare les données en données d'entraînements et données de tests
+trainIndex = dataset$Diagnostic %>% createDataPartition(p=0.7, times=1, list = FALSE)
+train = dataset[trainIndex,]
+test = dataset[-trainIndex,]
+
+model1 = glm(Diagnostic ~., data=train, family=binomial(link="logit"))
+#Anova(model1, type="II", test="LR")
+model2 = stepAIC(model1, direction = "both", k = 2, trace=FALSE)
+
+model2 = update(model2,~.-Cholestérol_LDL)
+#Anova(model2, type="II", test="LR")
+
+
+# Créer un tableau résumant les résultats du modèle
+model_summary <- tidy(model2)
+
+model_summary = model_summary[c(1,2,5)]
+
+model_summary = model_summary %>%
+  # Formater la p-value pour afficher 0% quand elle est inférieure à 0.001
+  mutate(
+    p.value = ifelse(p.value < 0.001, 0, format(p.value, digits = 3))
+  )
+
+model_summary$p.value = as.numeric(model_summary$p.value)
+
+# Créer le tableau avec gt
+model_summary_table <- model_summary %>%
+  gt() %>%
+  tab_header(
+    title = "Résultats du modèle de régression logistique"
+  ) %>%
+  cols_label(
+    term = "Variable",    # Nom de la variable
+    estimate = "Estimation",  # Estimation des coefficients
+    p.value = "p-value"    # p-value
+  ) %>%
+  fmt_number(
+    columns = vars(estimate),  # Formater les estimations des coefficients
+    decimals = 3  # Limiter à 3 décimales
+  ) %>%
+  fmt_number(
+    columns = vars(p.value),  # Formater les p-values
+    decimals = 3  # Limiter à 3 décimales
+  ) %>%
+  # Mettre en gras les noms des variables
+  tab_style(
+    style = cell_text(weight = "bold"),
+    locations = cells_column_labels(columns = vars(term))
+  ) %>%
+  # Mettre en italique les niveaux des variables
+  tab_style(
+    style = cell_text(style = "italic"),
+    locations = cells_body(columns = vars(term))
+  )
+
+# Afficher le tableau
+model_summary_table
+```
+
+*Interprétation des Résultats*<br>
+(Intercept) : L'intercept est de 3.877, avec une p-value de 0.000. Cela indique que lorsque toutes les autres variables sont égales à zéro, le log-odds d'un diagnostic de la maladie d'Alzheimer est élevé, ce qui signifie une probabilité importante de développement de la maladie.
+
+*Tabagisme* : Le coefficient associé au tabagisme est de -0.324 avec une p-value de 0.047, indiquant une association significative entre le tabagisme et la probabilité de développer la maladie d'Alzheimer. Plus précisément, être fumeur diminue légèrement la probabilité d’être diagnostiqué comme atteint de la maladie.
+
+*MMSE (Mini-Mental State Examination)* : Le score MMSE a un coefficient de -0.104 avec une p-value de 0.000, indiquant que les scores plus bas sur l’évaluation MMSE (qui mesure les fonctions cognitives) sont associés à une probabilité plus élevée de la maladie d'Alzheimer. Cela suggère que des déficits cognitifs plus importants sont un facteur de risque significatif.
+
+*Evaluation fonctionnelle* : L’évaluation fonctionnelle, avec un coefficient de -0.437 et une p-value de 0.000, montre que les individus ayant une évaluation fonctionnelle plus faible, ce qui indique une capacité fonctionnelle réduite, ont une probabilité accrue de développer la maladie.
+
+*Plaintes mémoires* : Les plaintes de mémoire sont fortement associées à la probabilité de la maladie, avec un coefficient de 2.645 et une p-value de 0.000. Cela suggère que les patients signalant des problèmes de mémoire ont une probabilité significativement plus élevée d'être diagnostiqués comme atteints d'Alzheimer.
+
+*Problèmes comportementaux* : Les problèmes comportementaux, avec un coefficient de 2.254 et une p-value de 0.000, montrent également une forte association avec le diagnostic de la maladie d'Alzheimer, soulignant que les changements de comportement sont des indicateurs importants de la maladie.
+
+*ADL (Activités de la vie quotidienne)* : Le coefficient pour les activités de la vie quotidienne (ADL) est de -0.400, avec une p-value de 0.000. Cela montre que les personnes ayant plus de difficultés avec les activités de la vie quotidienne sont plus susceptibles d'avoir un diagnostic d'Alzheimer.
+
+*Conclusion*<br>
+Les résultats du modèle de régression logistique montrent que plusieurs variables sont significativement associées à la probabilité de développer la maladie d'Alzheimer. Les facteurs comme les plaintes mémoires, les problèmes comportementaux, et la performance sur des tests cognitifs (MMSE) sont des indicateurs puissants de la maladie. En revanche, des facteurs comme le tabagisme, l’évaluation fonctionnelle et les difficultés avec les activités de la vie quotidienne peuvent également influencer la probabilité de la maladie, bien que dans une direction moins évidente.
+
+Ces résultats soulignent l’importance d’une approche multidimensionnelle pour prédire et comprendre les facteurs de risque de la maladie d'Alzheimer. De futures recherches pourraient explorer davantage ces facteurs pour mieux cibler les interventions de prévention et de dépistage précoce.
+
+\newpage
+
+```{r, include=FALSE, echo=FALSE}
+# Courbe de sensibilité et de spécificité
+library(ROCR)
+proba = predict(model2, newdata=train, type="response")
+pred <- prediction(proba, train$Diagnostic)
+perf2 = performance(pred, measure = "sens", x.measure = "spec")
+
+data2 = data.frame(Sensibility = perf2@y.values[[1]], Specificity = perf2@x.values[[1]], Cutoff = perf2@alpha.values[[1]])
+(opt2 = data2[which.min(abs(data2$Sensibility - data2$Specificity)),])
+
+ggplot(data=data2)+
+  geom_line(aes(x=Cutoff, y=Sensibility, color="1"), size=1.3)+
+  geom_line(aes(x=Cutoff, y=Specificity, color="2"), size=1.3)+
+  labs(title="Courbe de sensibilité et de spécificité", x="Cutoff", y="Value")+
+  scale_color_discrete(name = "", labels = c("Sensitivity", "Specificity"))+
+  geom_vline(aes(xintercept=opt2$Cutoff), lty=2)+
+  annotate(geom = "text", x=0.25, y=0.80, label=paste("Seuil : ", (opt2$Cutoff)))
+```
+
+## ) Prévision
+
+```{r prevision, echo=FALSE, warning=FALSE}
+# Prévision
+probability = model2 %>% predict(newdata=test, type="response")
+predicted = ifelse(probability > opt2$Cutoff, "yes", "no")
+predicted = factor(predicted)
+# Matrice de confusion
+confusionMatrix(data=predicted, reference=test$Diagnostic, positive = "yes")
+```
+La matrice de confusion et les statistiques associées fournissent une évaluation détaillée de la performance de votre modèle de régression logistique en termes de prédiction du diagnostic de la maladie d'Alzheimer (classe "yes" pour atteint et classe "no" pour non atteint). Voici l'interprétation de ces résultats :
+
+*Statistiques de performance* <br>
+**Accuracy** (Précision globale) : 0.8339 (83.39%)
+
+La précision globale du modèle est de 83.39%, ce qui signifie que le modèle a correctement prédit le diagnostic dans 83.39% des cas.
+
+*95% Confidence Interval* (Intervalle de Confiance à 95%) : (0.8028, 0.8618)
+
+Cela montre l'intervalle de confiance pour l'accuracy, indiquant que si le modèle était testé sur plusieurs échantillons, l'accuracy se situerait probablement entre 80.28% et 86.18%.
+
+
+*Résumé de la performance* : <br>
+**Vrais positifs (VP)** : Le modèle a identifié correctement 199 cas où la personne est atteinte.<br>
+**Vrais négatifs (VN)** : Le modèle a identifié correctement 338 cas où la personne n’est pas atteinte.<br>
+**Faux positifs (FP)** : Le modèle a classé incorrectement 78 personnes comme atteintes alors qu’elles ne le sont pas.<br>
+**Faux négatifs (FN)** : Le modèle a classé incorrectement 29 personnes comme non atteintes alors qu’elles sont réellement atteintes.<br>
+
+
+\newpage
+
+# ) Conclusion
+
+## Conclusion sur les causes de la maladie d'Alzheimer
+
+À travers l'analyse de la régression logistique effectuée, plusieurs variables ont été identifiées comme étant significativement associées à la probabilité de développer la maladie d'Alzheimer. Le modèle a permis de mettre en évidence des facteurs de risque et des éléments protecteurs en lien avec le diagnostic de la maladie.
+
+### Variables associées au risque accru de développer la maladie :<br>
+1. **Plaintes de mémoire** : Les individus présentant des plaintes de mémoire ont une probabilité considérablement plus élevée de développer Alzheimer (estimation = 2.645, p-value < 0.001). Cela confirme l'importance des signes précoces, tels que les troubles de mémoire, comme indicateurs clés dans le diagnostic de la maladie.
+   
+2. **Problèmes comportementaux** : Les personnes signalant des problèmes comportementaux ont également un risque accru de développer Alzheimer (estimation = 2.254, p-value < 0.001). Ces comportements peuvent inclure des changements dans les habitudes sociales ou des difficultés émotionnelles, soulignant l'impact des symptômes comportementaux dans l'évolution de la maladie.
+   
+3. **Niveau d'évaluation fonctionnelle** : Une évaluation fonctionnelle plus faible (estimation = −0.437, p-value < 0.001) est associée à un risque plus élevé. Cela peut refléter des déficits dans les activités de la vie quotidienne, qui deviennent de plus en plus difficiles avec la progression de la maladie.
+
+4. **MMSE (Mini-Mental State Examination)** : Un score plus bas au test MMSE est également un facteur de risque important (estimation = −0.104, p-value < 0.001). Ce test est couramment utilisé pour évaluer les capacités cognitives et, par conséquent, une diminution du score est fortement liée à la maladie d'Alzheimer.
+
+### Variables protectrices ou réduisant le risque : <br>
+1. **Tabagisme** : Bien que le tabagisme soit généralement associé à de nombreux problèmes de santé, l'analyse a montré que le tabagisme pourrait avoir un effet protecteur en termes de prédiction de la maladie (estimation = −0.324, p-value = 0.047). Cette relation inverse pourrait être influencée par des facteurs confondants, mais il est important de noter que le tabagisme n'est généralement pas vu comme un facteur protecteur en soi.
+
+2. **Activités de la vie quotidienne (ADL)** : Un meilleur score dans les activités de la vie quotidienne (ADL) (estimation = −0.400, p-value < 0.001) semble offrir un certain niveau de protection contre la progression vers Alzheimer, ce qui est cohérent avec l'idée que les personnes capables de maintenir leur autonomie fonctionnelle ont un risque réduit de déclin cognitif.
+
+### Performance du modèle : <br>
+Le modèle a montré une bonne capacité à prédire les individus atteints de la maladie d'Alzheimer, avec une **exactitude de 83,39%** et une **sensibilité** de 87,28%. Cela signifie que le modèle est particulièrement efficace pour identifier les personnes réellement atteintes de la maladie. La **spécificité** était de 81,25%, indiquant également une bonne capacité à identifier correctement les personnes non atteintes.
+
+## Limites et perspectives :
+Bien que ce modèle fournisse une vue d'ensemble utile des facteurs associés à Alzheimer, il existe plusieurs limites à considérer. Les variables sélectionnées dans le modèle ne couvrent pas toutes les causes possibles de la maladie, et des facteurs génétiques ou environnementaux non mesurés pourraient jouer un rôle important. De plus, l'impact de certaines variables, telles que le tabagisme, nécessite des recherches supplémentaires pour mieux comprendre sa relation avec la maladie.
+
+Il serait également pertinent de valider ce modèle avec d'autres populations pour confirmer sa généralité et d'explorer davantage les interactions entre ces variables afin de mieux comprendre les mécanismes sous-jacents de la maladie d'Alzheimer.
+
+En conclusion, les résultats de cette analyse soulignent l'importance des symptômes cognitifs et comportementaux précoces dans la détection et la prédiction du risque de la maladie d'Alzheimer. Le modèle offre un outil utile pour identifier les individus à risque et pourrait aider dans les stratégies de prévention et de gestion de la maladie.
+</div>
